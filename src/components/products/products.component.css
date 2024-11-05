@@ -1,0 +1,10 @@
+.table img {
+    width: 100px;
+    height: auto;
+  }
+  
+  thead {
+    background-color: #343a40;
+    color: #fff;
+  }
+  
