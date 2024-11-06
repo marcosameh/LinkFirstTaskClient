@@ -6,7 +6,7 @@ import { Config } from 'datatables.net';
 import { DataTablesModule } from 'angular-datatables';
 
 @Component({
-  selector: 'app-product-list',
+  selector: 'app-products',
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.css'],
   standalone: true,

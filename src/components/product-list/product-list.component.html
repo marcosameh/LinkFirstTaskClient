@@ -1,0 +1,32 @@
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Product List</h2>
+    <input type="text" placeholder="Search..." (input)="onSearch($event)" />
+  
+    <table class="table table-striped table-hover">
+      <thead class="thead-dark">
+        <tr>
+          <th (click)="onSort('id', paginationFilter.sortDirection === 'asc' ? 'desc' : 'asc')">#</th>
+          <th (click)="onSort('name', paginationFilter.sortDirection === 'asc' ? 'desc' : 'asc')">Product</th>
+          <th>Photo</th>
+          <th (click)="onSort('price', paginationFilter.sortDirection === 'asc' ? 'desc' : 'asc')">Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of products">
+          <td>{{ product?.id }}</td>
+          <td>{{ product?.name }}</td>
+          <td><img [src]="product?.photo" alt="Product Image" style="width: 100px; height: auto;" /></td>
+          <td>{{ product?.price }} $</td>
+        </tr>
+      </tbody>
+    </table>
+  
+    <nav>
+      <ul class="pagination">
+        <li *ngFor="let page of [1, 2, 3, 4]" (click)="onPageChange(page)">
+          <a class="page-link">{{ page }}</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+  
