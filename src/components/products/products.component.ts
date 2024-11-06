@@ -1,58 +1,90 @@
 import { Component, OnInit } from '@angular/core';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../models/Product.model';
-import { PaginationFilter } from '../../models/paginationfilter.model';
-import { DataTablesModule } from "angular-datatables";
-import { Subject } from 'rxjs';
+import { PaginationFilter } from '../../models/PaginationFilter.model';
 import { Config } from 'datatables.net';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { DataTablesModule } from 'angular-datatables';
 
 @Component({
   selector: 'app-product-list',
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.css'],
   standalone: true,
-  imports: [DataTablesModule, CommonModule,FormsModule],
+  imports: [DataTablesModule],
 })
 export class ProductsComponent implements OnInit {
   products: Product[] = [];
   totalRecords: number = 0;
   dtoptions: Config = {};
-  dtTrigger: Subject<any> = new Subject<any>();
-
-  // Add an array to track quantities for each product
-  quantities: number[] = [];
 
   constructor(private productService: ProductService) {}
 
   ngOnInit(): void {
-    this.loadProducts();
     this.dtoptions = {
-      pagingType: 'full_numbers'
+      serverSide: true,
+      processing: true,
+      pagingType: 'full_numbers',
+      ajax: (dataTablesParameters: any, callback) => {
+        const paginationFilter: PaginationFilter = {
+          start: dataTablesParameters.start,
+          length: dataTablesParameters.length,
+          searchValue: dataTablesParameters.search.value || '',
+          sortColumn: dataTablesParameters.columns[dataTablesParameters.order[0].column].data,
+          sortDirection: dataTablesParameters.order[0].dir
+        };
+
+        this.productService.getProducts(paginationFilter).subscribe(response => {
+          if (response.success) {
+            this.products = response.data.data;
+            this.totalRecords = response.data.totalRecords;
+
+            callback({
+              recordsTotal: this.totalRecords,
+              recordsFiltered: this.totalRecords,
+              data: this.products
+            });
+          } else {
+            console.error(response.errors);
+          }
+        });
+      },
+      columns: [
+        { data: 'id' },
+        { data: 'name' },
+        {
+          data: 'photo',
+          render: (data) => `<img src="${data}" alt="Product Image" style="width: 100px; height: auto;">`
+        },
+        { data: 'price', render: (data) => `${data} $` },
+        {
+          data: null,
+          orderable: false,
+          render: (data, type, row, meta) => `
+            <input type="number" class="form-control quantity-input" id="quantity-${row.id}" value="1" min="1" />
+          `
+        },
+        {
+          data: null,
+          orderable: false,
+          render: (data, type, row, meta) => `
+            <button class="btn btn-success add-to-cart" onclick="addToCart(${row.id})">
+              <i class="fas fa-cart-plus"></i> Add
+            </button>
+          `
+        }
+      ]
     };
   }
-
-  loadProducts(): void {
-    const paginationFilter: PaginationFilter = { start: 0, length: 10 };
-    this.productService.getProducts(paginationFilter).subscribe(response => {
-      if (response.success) {
-        this.products = response.data.data;
-        this.totalRecords = response.data.totalRecords;
-        
-        // Initialize the quantities array with default values (1 for each product)
-        this.quantities = new Array(this.products.length).fill(1);
-        
-        this.dtTrigger.next(null);
-      } else {
-        console.error(response.errors);
-      }
-    });
+  addToCart(productId: number): void {
+    const quantityInput = document.getElementById(`quantity-${productId}`) as HTMLInputElement;
+    const quantity = parseInt(quantityInput.value, 10);
+  
+    if (quantity > 0) {
+      console.log(`Adding ${quantity} of product ID ${productId} to cart`);
+      // Implement the actual logic to add the product to the cart
+    } else {
+      console.error("Quantity must be greater than 0");
+    }
   }
-
-  // Add to cart function accepting product and quantity
-  addToCart(product: Product, quantity: number): void {
-    console.log(`Adding ${quantity} of ${product.name} to cart`);
-    // Logic to add the product with the specified quantity to the cart
-  }
+  
 }
