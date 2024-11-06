@@ -67,7 +67,7 @@ export class ProductsComponent implements OnInit {
           data: null,
           orderable: false,
           render: (data, type, row, meta) => `
-            <button class="btn btn-success add-to-cart" onclick="addToCart(${row.id})">
+            <button class="btn btn-success add-to-cart" (click)="addToCart(${row.id})">
               <i class="fas fa-cart-plus"></i> Add
             </button>
           `
