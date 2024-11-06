@@ -3,16 +3,18 @@ import { ProductService } from '../../services/product.service';
 import { Product } from '../../models/Product.model';
 import { PaginationFilter } from '../../models/PaginationFilter.model';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule],
+  imports:[FormsModule],
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css']
 })
 export class ProductListComponent implements OnInit {
   products: Product[] = [];
+  searchValue="";
   totalRecords: number = 0;
   paginationFilter: PaginationFilter = {
     start: 0,
@@ -21,7 +23,7 @@ export class ProductListComponent implements OnInit {
     sortColumn: 'name',
     sortDirection: 'asc'
   };
-
+  pages: number[] = [];
   constructor(private productService: ProductService) {}
 
   ngOnInit(): void {
@@ -33,6 +35,7 @@ export class ProductListComponent implements OnInit {
       if (response.success) {
         this.products = response.data.data;
         this.totalRecords = response.data.totalRecords;
+        this.pages = Array.from({ length: Math.ceil(this.totalRecords / this.paginationFilter.length) }, (_, i) => i + 1);
       } else {
         console.error('Failed to fetch products:', response.errors);
       }
@@ -54,5 +57,9 @@ export class ProductListComponent implements OnInit {
     const inputElement = event.target as HTMLInputElement;
     this.paginationFilter.searchValue = inputElement.value;
     this.loadProducts();
+  }
+
+  CreateOrder(id:number){
+  console.log("HIII")
   }
 }
