@@ -2,9 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../models/Product.model';
 import { PaginationFilter } from '../../models/PaginationFilter.model';
-import { CommonModule } from '@angular/common';
+import { CreateOrder } from '../../models/CreateOrder.model';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { OrderService } from '../../services/order.service';
+import { Toast, ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-product-list',
@@ -26,7 +28,9 @@ export class ProductListComponent implements OnInit {
   };
   pages: number[] = [];
   constructor(private productService: ProductService,
-    private router: Router
+    private orderService:OrderService,
+    private router: Router,
+    private toastr:ToastrService
   ) {}
 
   ngOnInit(): void {
@@ -62,8 +66,31 @@ export class ProductListComponent implements OnInit {
     this.loadProducts();
   }
 
-  CreateOrder(id:number){
-  console.log("HIII")
-  this.router.navigate(['/Order', id]);
+  CreateOrder(productId: number,quantity:number): void {
+    
+
+    const newOrder: CreateOrder = {
+      orderItems: [
+        {
+          productId: productId,
+          quantity: quantity
+        }
+      ]
+    };
+
+    this.orderService.createOrder(newOrder).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.toastr.success('Order created successfully!', 'Success');
+          this.router.navigate(['/Order', res.data]); 
+        } else {
+          this.toastr.error('Failed to create order', res.errors.join(', '));
+        }
+      },
+      error: (err) => {
+        this.toastr.error('An error occurred while creating the order', 'Error');
+        console.error('Error creating order:', err);
+      }
+    });
   }
 }

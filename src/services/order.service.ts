@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../environments/environment.development';
 import { ApiResponse } from '../models/ApiResponse.model';
 import { SubmitOrder } from '../models/SubmitOrder.model';
-import { CreateOrderDto } from '../models/CeateOrderModel';
+import { CreateOrder } from '../models/CreateOrder.model';
 import { Order } from '../models/Order.model';
 
 
@@ -17,7 +17,7 @@ export class OrderService {
   constructor(private http: HttpClient) {}
 
   // Create a new order
-  createOrder(orderDto: CreateOrderDto): Observable<ApiResponse<number>> {
+  createOrder(orderDto: CreateOrder): Observable<ApiResponse<number>> {
     return this.http.post<ApiResponse<number>>(`${this.apiUrl}`, orderDto);
   }
 
