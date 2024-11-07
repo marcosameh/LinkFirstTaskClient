@@ -7,5 +7,6 @@ export interface Order {
   export interface OrderItem {
     productId: number;
     quantity: number;
+    unitPrice:number;
     name: string;
   }
