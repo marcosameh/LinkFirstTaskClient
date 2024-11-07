@@ -4,6 +4,7 @@ import { Product } from '../../models/Product.model';
 import { PaginationFilter } from '../../models/PaginationFilter.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-product-list',
@@ -24,7 +25,9 @@ export class ProductListComponent implements OnInit {
     sortDirection: 'asc'
   };
   pages: number[] = [];
-  constructor(private productService: ProductService) {}
+  constructor(private productService: ProductService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadProducts();
@@ -61,5 +64,6 @@ export class ProductListComponent implements OnInit {
 
   CreateOrder(id:number){
   console.log("HIII")
+  this.router.navigate(['/Order', id]);
   }
 }
