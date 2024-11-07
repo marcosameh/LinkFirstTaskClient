@@ -1,0 +1,16 @@
+.container {
+    max-width: 900px;
+  }
+  
+  .order-details {
+    background-color: #f8f9fa;
+  }
+  
+  .customer-form {
+    background-color: #fff;
+  }
+  
+  button.btn-primary {
+    width: 100%;
+  }
+  
