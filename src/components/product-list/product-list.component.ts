@@ -6,18 +6,18 @@ import { CreateOrder } from '../../models/CreateOrder.model';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { OrderService } from '../../services/order.service';
-import { Toast, ToastrService } from 'ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports:[FormsModule],
+  imports: [FormsModule],
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css']
 })
 export class ProductListComponent implements OnInit {
   products: Product[] = [];
-  searchValue="";
+  searchValue = '';
   totalRecords: number = 0;
   paginationFilter: PaginationFilter = {
     start: 0,
@@ -27,10 +27,15 @@ export class ProductListComponent implements OnInit {
     sortDirection: 'asc'
   };
   pages: number[] = [];
-  constructor(private productService: ProductService,
-    private orderService:OrderService,
+
+  // Create a map to store the quantities for each product
+  orderItems: { productId: number, quantity: number }[] = [];
+
+  constructor(
+    private productService: ProductService,
+    private orderService: OrderService,
     private router: Router,
-    private toastr:ToastrService
+    private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
@@ -43,6 +48,9 @@ export class ProductListComponent implements OnInit {
         this.products = response.data.data;
         this.totalRecords = response.data.totalRecords;
         this.pages = Array.from({ length: Math.ceil(this.totalRecords / this.paginationFilter.length) }, (_, i) => i + 1);
+        
+        // Initialize orderItems array with default quantities
+        this.orderItems = this.products.map(product => ({ productId: product.id, quantity: 0 }));
       } else {
         console.error('Failed to fetch products:', response.errors);
       }
@@ -66,16 +74,25 @@ export class ProductListComponent implements OnInit {
     this.loadProducts();
   }
 
-  CreateOrder(productId: number,quantity:number): void {
-    
+  // Method to handle quantity change
+  onQuantityChange(productId: number, quantity: number): void {
+    const item = this.orderItems.find(item => item.productId === productId);
+    if (item) {
+      item.quantity = quantity;
+    }
+  }
+
+  // Create an order for all selected products
+  createOrder(): void {
+    const itemsToOrder = this.orderItems.filter(item => item.quantity > 0);
+
+    if (itemsToOrder.length === 0) {
+      this.toastr.error('Please select at least one product to order', 'Error');
+      return;
+    }
 
     const newOrder: CreateOrder = {
-      orderItems: [
-        {
-          productId: productId,
-          quantity: quantity
-        }
-      ]
+      orderItems: itemsToOrder
     };
 
     this.orderService.createOrder(newOrder).subscribe({

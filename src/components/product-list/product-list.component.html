@@ -10,10 +10,10 @@
         <th>Photo</th>
         <th (click)="onSort('price', paginationFilter.sortDirection === 'asc' ? 'desc' : 'asc')">Price</th>
         <th scope="col">Quantity</th>
-        <th scope="col">Process</th>
       </tr>
     </thead>
     <tbody>
+      
       @for (product of products; track product.id)
       {
       <tr>
@@ -21,10 +21,11 @@
         <td>{{ product.name }}</td>
         <td><img [src]="product.photo" alt="Product Image" style="width: 100px; height: auto;" /></td>
         <td>{{ product?.price }} $</td>
-        <td><input type="number" class="form-control" [(ngModel)]="product.Quantity" min="0" /></td>
-        <td><button class="btn btn-success add-to-cart" [disabled]="product.Quantity==0 ||!product.Quantity" (click)="CreateOrder(product.id,product.Quantity)">
-          <i class="fas fa-cart-plus"></i> Buy
-        </button></td>
+        <td>
+          <input type="number" class="form-control" [(ngModel)]="product.Quantity"
+                 min="0" (ngModelChange)="onQuantityChange(product.id, product.Quantity)" />
+        </td>
+        
       </tr>
       }
     </tbody>
@@ -32,13 +33,19 @@
 
   <nav>
     <ul class="pagination">
-      @for (page of pages; track $index)
+      @for(page of pages; track $index)
       {
         <li (click)="onPageChange(page)">
           <a class="page-link">{{ page }}</a>
         </li>
       }
-      
     </ul>
   </nav>
+
+  <!-- Place a single submit button outside the table -->
+  <div class="text-center mt-4">
+    <button class="btn btn-primary" (click)="createOrder()">
+      <i class="fas fa-cart-plus"></i> Save Order
+    </button>
+  </div>
 </div>
