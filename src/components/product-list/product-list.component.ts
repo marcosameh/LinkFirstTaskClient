@@ -28,8 +28,8 @@ export class ProductListComponent implements OnInit {
   };
   pages: number[] = [];
 
-  // Create a map to store the quantities for each product
-  orderItems: { productId: number, quantity: number }[] = [];
+  // Map to store the quantities for each product
+  orderItemsMap: { [productId: number]:  number } = {};
 
   constructor(
     private productService: ProductService,
@@ -49,8 +49,10 @@ export class ProductListComponent implements OnInit {
         this.totalRecords = response.data.totalRecords;
         this.pages = Array.from({ length: Math.ceil(this.totalRecords / this.paginationFilter.length) }, (_, i) => i + 1);
         
-        // Initialize orderItems array with default quantities
-        this.orderItems = this.products.map(product => ({ productId: product.id, quantity: 0 }));
+       
+        this.products.forEach(product => {
+          product.Quantity = this.orderItemsMap[product.id] || 0; // Restore saved quantity or default to 0
+        });
       } else {
         console.error('Failed to fetch products:', response.errors);
       }
@@ -74,17 +76,19 @@ export class ProductListComponent implements OnInit {
     this.loadProducts();
   }
 
-  // Method to handle quantity change
+ 
   onQuantityChange(productId: number, quantity: number): void {
-    const item = this.orderItems.find(item => item.productId === productId);
-    if (item) {
-      item.quantity = quantity;
-    }
+    this.orderItemsMap[productId] = quantity;
   }
 
-  // Create an order for all selected products
+  
   createOrder(): void {
-    const itemsToOrder = this.orderItems.filter(item => item.quantity > 0);
+    const itemsToOrder = Object.keys(this.orderItemsMap)
+      .map(productId => ({
+        productId: +productId,
+        quantity: this.orderItemsMap[+productId]
+      }))
+      .filter(item => item.quantity > 0);
 
     if (itemsToOrder.length === 0) {
       this.toastr.error('Please select at least one product to order', 'Error');
